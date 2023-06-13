@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\TaskDTO;
 use App\Models\Task;
+use App\Services\TasksService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
@@ -19,19 +21,20 @@ class TasksController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): array
+    public function store(Request $request, TasksService $task): array
     {
         $params = $request->request;
 
-        $task = new Task();
-        $task->setAttribute('user_id', $params->get('user_id'));
-        $task->setAttribute('tags', $params->get('tags'));
-        $task->setAttribute('name', $params->get('name'));
-        $task->setAttribute('description', $params->get('description'));
-        $task->setAttribute('updated_at', null);
-        $task->save();
+        $taskDTO = new TaskDTO(
+            $params->get('user_id'),
+            $params->get('tags'),
+            $params->get('name'),
+            $params->get('description'),
+        );
 
-        return ['id' => $task->getAttribute('id')];
+        $id = $task->create($taskDTO);
+
+        return ['id' => $id];
     }
 
     /**
