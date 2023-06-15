@@ -5,28 +5,36 @@ namespace App\Http\Controllers;
 use App\DTO\TaskDTO;
 use App\Models\Task;
 use App\Services\TasksService;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TasksController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['login']]);
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index(): Collection
+    public function index(): JsonResponse
     {
-        return Task::all();
+        $userId = auth()->user()->getKey();
+        $tasks = Task::where('user_id', $userId)->get();
+
+        return response()->json($tasks);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, TasksService $task): array
+    public function store(Request $request, TasksService $task): JsonResponse
     {
         $params = $request->request;
 
         $taskDTO = new TaskDTO(
-            $params->get('user_id'),
+            auth()->user()->getKey(),
             $params->get('tags'),
             $params->get('name'),
             $params->get('description'),
@@ -34,36 +42,37 @@ class TasksController extends Controller
 
         $id = $task->create($taskDTO);
 
-        return ['id' => $id];
+        return response()->json(['id' => $id]);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(int $id): Task
+    public function show(int $id): JsonResponse
     {
-        return Task::findorFail($id);
+        return response()->json(Task::findorFail($id));
+
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id): array
+    public function update(Request $request, int $id): JsonResponse
     {
         $task = Task::find($id);
         $task->update($request->request->all());
 
-        return [];
+        return response()->json([], 204);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id): array
+    public function destroy(int $id): JsonResponse
     {
         $task = Task::find($id);
         $task->delete();
 
-        return [];
+        return response()->json([], 204);
     }
 }
