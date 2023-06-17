@@ -7,7 +7,15 @@ use App\Models\Task;
 
 class TasksService
 {
-    private const STATUS_NEW = 'new';
+    private const STATUS_NEW        = 'new';
+    private const STATUS_IN_PROCESS = 'in_process';
+    private const STATUS_CLOSED     = 'closed';
+
+    public const STATUSES = [
+        self::STATUS_NEW,
+        self::STATUS_IN_PROCESS,
+        self::STATUS_CLOSED,
+    ];
 
     /**
      * @param TaskDTO $taskDTO
