@@ -1,0 +1,17 @@
+FROM php:8.2-fpm
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y \
+    git unzip \
+    libc-client-dev \
+    libssh-dev \
+    librabbitmq-dev \
+    libmemcached-dev \
+    libkrb5-dev && rm -r /var/lib/apt/lists/* \
+    && pecl install xdebug-3.2.0 \
+    && pecl install amqp \
+    && docker-php-ext-enable amqp
+
+WORKDIR /var/www/html/app

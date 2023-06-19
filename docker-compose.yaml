@@ -1,0 +1,41 @@
+version: "3.3"
+
+networks:
+  docker:
+    driver: bridge
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: "database"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
+    networks:
+      - docker
+    ports:
+      - "5432:5432"
+    volumes:
+      - .:/docker-entrypoint-initdb.d
+    container_name: db
+
+  app:
+    build: docker/php-fpm
+    volumes:
+      - .:/var/www/html/app
+    networks:
+      - docker
+    environment:
+      PHP_IDE_CONFIG: "serverName=App"
+    container_name: app
+
+  nginx:
+    image: nginx:1.23
+    volumes:
+      - .:/var/www/html/app
+      - ./docker/nginx/app.conf:/etc/nginx/conf.d/app.conf
+    networks:
+      - docker
+    ports:
+      - "80:80"
+    container_name: nginx
