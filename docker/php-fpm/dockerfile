@@ -10,8 +10,18 @@ RUN apt-get update --fix-missing && \
     librabbitmq-dev \
     libmemcached-dev \
     libkrb5-dev && rm -r /var/lib/apt/lists/* \
-    && pecl install xdebug-3.2.0 \
+    && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+    && docker-php-ext-install imap \
     && pecl install amqp \
     && docker-php-ext-enable amqp
+
+RUN apt-get update && \
+    apt-get install -y libpq-dev && \
+    docker-php-ext-install pdo pdo_pgsql pgsql
+
+RUN pecl install xdebug-3.2.0 \
+        && docker-php-ext-enable xdebug
+
+COPY ./php-additional.ini /usr/local/etc/php/conf.d/php-additional.ini
 
 WORKDIR /var/www/html/app
